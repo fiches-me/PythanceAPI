@@ -1,5 +1,6 @@
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Boolean, ForeignKey
 from sqlalchemy.sql import text
+from sqlalchemy.engine.reflection import Inspector
 
 class SimpleDB:
     """
@@ -11,20 +12,22 @@ class SimpleDB:
         self.engine = create_engine(db_url)
         self.metadata = MetaData()
         self.connection = self.engine.connect()
+        self.inspector = Inspector.from_engine(self.engine)
 
     def init_table(self, table_name, fields, primary_key=None):
         """Create a table if it doesn't exist, with support for foreign keys."""
-        columns = []
-        for name, type_ in fields.items():
-            if isinstance(type_, tuple):  # Handle foreign keys: ("FOREIGN KEY", "users(id)")
-                ref_table, ref_column = type_[1].split(".")
-                columns.append(Column(name, Integer, ForeignKey(f"{ref_table}.{ref_column}")))
-            else:
-                columns.append(self._parse_field(name, type_))
-        table = Table(table_name, self.metadata, *columns, extend_existing=True)
-        if not self.engine.has_table(table_name):
+        if not self.inspector.has_table(table_name):
+            columns = []
+            for name, type_ in fields.items():
+                if isinstance(type_, tuple) and type_[0] == "FOREIGN KEY":
+                    ref_table, ref_column = type_[1].split("(")
+                    ref_column = ref_column.rstrip(")")  # Remove the closing parenthesis
+                    columns.append(Column(name, Integer, ForeignKey(f"{ref_table}.{ref_column}")))
+                else:
+                    columns.append(self._parse_field(name, type_))
+            table = Table(table_name, self.metadata, *columns, extend_existing=True)
             table.create(self.engine)
-        return table
+
 
     def _parse_field(self, name, type_):
         """Convert a string type to a SQLAlchemy type."""

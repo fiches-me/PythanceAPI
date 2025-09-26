@@ -12,7 +12,7 @@ def init_database_scheme(db):
         "name": "TEXT",
         "owner_id": ("FOREIGN KEY", "users(id)"),
     }
-    db.init_table("users", org_fields, primary_key="id")
+    db.init_table("orgs", org_fields, primary_key="id")
 
     tokens_fields = {
         "id": "INT",
