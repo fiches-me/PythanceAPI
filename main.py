@@ -10,8 +10,8 @@ from database import SimpleDB
 app = FastAPI(title="Pythance API")
 
 # Load and initialize database
-db = SimpleDB("sqlite:///local.db")
-init_database_scheme(db)
+#db = SimpleDB("sqlite:///local.db")
+#init_database_scheme(db)
 
 app.include_router(default_router)
 app.include_router(v1_router)
