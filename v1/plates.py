@@ -4,9 +4,9 @@ from pydantic import BaseModel
 router = APIRouter()
 
 @router.get("/")
-async def ping():
+async def get_plates():
     """
-    Ping route to check if the API is online and running
+    Get the list of planned plates.
     """
     # logique de création → remplace par DB
     return {"status": "online"}
