@@ -20,3 +20,10 @@ def init_database_scheme(db):
         "owner_id": ("FOREIGN KEY", "users(id)"),
     }
     db.init_table("tokens", tokens_fields, primary_key="id")
+
+    code_fields = {
+        "id": "INT",
+        "code": "TEXT",
+        "email": "TEXT",
+    }
+    db.init_table("codes", code_fields, primary_key="id")

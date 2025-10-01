@@ -50,8 +50,12 @@ class SimpleDB:
         return Column(name, type_map.get(type_.upper(), String))
 
     def execute(self, query, params=None):
-        """Execute a raw SQL query."""
-        return self.connection.execute(text(query), params or ())
+        """Exécute une requête SQL brute."""
+        if params is None:
+            params = ()
+        # Assurez-vous que params est un tuple ou une liste de valeurs
+        return self.connection.execute(text(query), params)
+
 
     def select(self, table, where=None, params=None):
         """Select rows from a table."""
@@ -61,11 +65,15 @@ class SimpleDB:
         return self.execute(query, params)
 
     def insert(self, table, data):
-        """Insert a row into a table."""
+        """Insère une nouvelle ligne dans la table spécifiée."""
         columns = ", ".join(data.keys())
         placeholders = ", ".join(["?" for _ in data])
         query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
-        return self.execute(query, tuple(data.values()))
+        # Assurez-vous que les valeurs sont bien un tuple de valeurs simples
+        values = tuple(data.values())
+        print("Valeurs à insérer :", values)  # Pour le débogage
+        return self.execute(query, values)
+
     
     def print_schema(self):
         """Imprime le schéma de la base de données."""
