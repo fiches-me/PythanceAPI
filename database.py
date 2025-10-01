@@ -15,18 +15,26 @@ class SimpleDB:
         self.inspector = Inspector.from_engine(self.engine)
 
     def init_table(self, table_name, fields, primary_key=None):
-        """Create a table if it doesn't exist, with support for foreign keys."""
+        # Rafraîchir la métadonnée pour s'assurer que toutes les tables sont connues
+        self.metadata.reflect(bind=self.engine)
+
         if not self.inspector.has_table(table_name):
             columns = []
             for name, type_ in fields.items():
                 if isinstance(type_, tuple) and type_[0] == "FOREIGN KEY":
                     ref_table, ref_column = type_[1].split("(")
-                    ref_column = ref_column.rstrip(")")  # Remove the closing parenthesis
+                    ref_column = ref_column.rstrip(")")
+                    # Vérifiez que la table référencée existe dans la métadonnée
+                    if ref_table not in self.metadata.tables:
+                        # Si la table existe dans la base mais pas dans la métadonnée, chargez-la
+                        Table(ref_table, self.metadata, autoload_with=self.engine)
                     columns.append(Column(name, Integer, ForeignKey(f"{ref_table}.{ref_column}")))
                 else:
                     columns.append(self._parse_field(name, type_))
             table = Table(table_name, self.metadata, *columns, extend_existing=True)
             table.create(self.engine)
+        else:
+            print(f"La table {table_name} existe déjà.")
 
 
     def _parse_field(self, name, type_):
@@ -58,6 +66,20 @@ class SimpleDB:
         placeholders = ", ".join(["?" for _ in data])
         query = f"INSERT INTO {table} ({columns}) VALUES ({placeholders})"
         return self.execute(query, tuple(data.values()))
+    
+    def print_schema(self):
+        """Imprime le schéma de la base de données."""
+        print("Tables dans la base de données :")
+        for table_name in self.inspector.get_table_names():
+            print(f"\nTable: {table_name}")
+            columns = self.inspector.get_columns(table_name)
+            for column in columns:
+                print(f"  - {column['name']} ({column['type']})")
+            # Afficher les clés étrangères si elles existent
+            fks = self.inspector.get_foreign_keys(table_name)
+            for fk in fks:
+                print(f"  - FK: {fk['constrained_columns']} -> {fk['referred_table']}.{fk['referred_columns']}")
+
 
     def close(self):
         """Close the connection."""

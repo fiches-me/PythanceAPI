@@ -21,4 +21,4 @@ async def login_request(payload: LoginRequest):
         mail.MailHelper().verification_email(payload.email, 1111)
         return {"success": True}
     except Exception as e:
-        return {"success": False, "error": e}, 500
+        return {"success": False, "error": e}, 403
