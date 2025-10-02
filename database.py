@@ -40,7 +40,7 @@ class SimpleDB:
     def _parse_field(self, name, type_):
         type_map = {
         "INT": Integer,
-        "TEXT": Text,  # Utiliser un vrai TEXT MySQL
+        "TEXT": lambda: String(1024),  # Utiliser un vrai TEXT MySQL
         "VARCHAR": lambda: String(255),  # Si tu veux des varchar
         "BOOL": Boolean,
         "FLOAT": Float,
