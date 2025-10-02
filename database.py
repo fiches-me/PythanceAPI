@@ -38,11 +38,11 @@ class SimpleDB:
 
 
     def _parse_field(self, name, type_):
-        from sqlalchemy import Integer, String, Boolean, Float, DateTime
+        from sqlalchemy import Integer, String, Boolean, Float, DateTime, Text
         type_map = {
         "INT": Integer,
-        "TEXT": String,  # Utiliser un vrai TEXT MySQL
-        "VARCHAR": lambda: String(255),  # Si tu veux des varchar
+        "TEXT": Text,  # ici on met Text() qui est cross-DB et valide en MySQL/Postgres/SQLite
+        "VARCHAR": lambda: String(255),  # toujours explicite
         "BOOL": Boolean,
         "FLOAT": Float,
         "DATETIME": DateTime,
@@ -52,6 +52,8 @@ class SimpleDB:
             t = type_map[type_.upper()]
             return Column(name, t() if callable(t) else t)
 
+    # fallback → varchar(255) pour MySQL compat
+    return Column(name, String(255))
         # fallback → varchar(255)
         return Column(name, String(255))
     def execute(self, query, params=None):
