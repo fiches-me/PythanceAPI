@@ -38,17 +38,21 @@ class SimpleDB:
 
 
     def _parse_field(self, name, type_):
-        """Convert a string type to a SQLAlchemy type."""
-        from sqlalchemy import Integer, String, Boolean, Float, DateTime
         type_map = {
-            "INT": Integer,
-            "TEXT": String,
-            "BOOL": Boolean,
-            "FLOAT": Float,
-            "DATETIME": DateTime,
+        "INT": Integer,
+        "TEXT": Text,  # Utiliser un vrai TEXT MySQL
+        "VARCHAR": lambda: String(255),  # Si tu veux des varchar
+        "BOOL": Boolean,
+        "FLOAT": Float,
+        "DATETIME": DateTime,
         }
-        return Column(name, type_map.get(type_.upper(), String))
 
+        if type_.upper() in type_map:
+            t = type_map[type_.upper()]
+            return Column(name, t() if callable(t) else t)
+
+        # fallback → varchar(255)
+        return Column(name, String(255))
     def execute(self, query, params=None):
         """Exécute une requête SQL brute."""
         if params is None:
