@@ -51,10 +51,6 @@ class SimpleDB:
         if type_.upper() in type_map:
             t = type_map[type_.upper()]
             return Column(name, t() if callable(t) else t)
-
-    # fallback → varchar(255) pour MySQL compat
-    return Column(name, String(255))
-        # fallback → varchar(255)
         return Column(name, String(255))
     def execute(self, query, params=None):
         """Exécute une requête SQL brute."""
