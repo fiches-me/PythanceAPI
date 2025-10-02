@@ -38,9 +38,10 @@ class SimpleDB:
 
 
     def _parse_field(self, name, type_):
+        from sqlalchemy import Integer, String, Boolean, Float, DateTime
         type_map = {
         "INT": Integer,
-        "TEXT": lambda: String(1024),  # Utiliser un vrai TEXT MySQL
+        "TEXT": String,  # Utiliser un vrai TEXT MySQL
         "VARCHAR": lambda: String(255),  # Si tu veux des varchar
         "BOOL": Boolean,
         "FLOAT": Float,
