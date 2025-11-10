@@ -2,3 +2,4 @@ fastapi
 SQLAlchemy
 PyMySQL
 pydantic
+uvicorn
