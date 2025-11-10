@@ -2,11 +2,10 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from utils import mail
 from random import randint
-from database import SimpleDB
-import os
+from database import get_session
+from models import Code
 
 router = APIRouter()
-db = SimpleDB(os.environ["DATABASE_LINK"])
 
 # modèles définis dans ce fichier (selon ta contrainte)
 class LoginRequest(BaseModel):
@@ -30,13 +29,11 @@ async def login_request(payload: LoginRequest):
     try:
         code = random_code()
         email_value = payload.email
-        try:
-            db.execute("INSERT INTO codes (email, code) VALUES (?, ?)", (email_value, code))
-        except Exception as e:
-            print(f"Erreur détaillée : {e}")
-            print(f"Type de payload.email : {type(payload.email)}")
-            print(f"Type de code : {type(code)}")
+        with get_session() as session:
+            code_obj = Code(email=email_value, code=code)
+            session.add(code_obj)
+            session.commit()
         mail.MailHelper().verification_email(email_value, code)
         return {"success": True}
     except Exception as e:
-        return {"success": False, "error": e}, 403
+        raise HTTPException(status_code=403, detail=str(e))
