@@ -2,6 +2,8 @@ from sqlmodel import create_engine, Session
 from models import SQLModel
 import os
 
+DB_URL = os.environ["DATABASE_LINK"]
+print(DB_URL)
 # Create engine
 engine = create_engine(os.environ["DATABASE_LINK"])
 

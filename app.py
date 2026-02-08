@@ -5,8 +5,6 @@ from default import router as default_router
 
 from utils.init_database import init_database_scheme
 
-import os
-
 # Load App
 app = FastAPI(title="Pythance API")
 

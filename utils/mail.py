@@ -32,8 +32,10 @@ class MailHelper:
     def send_mail(self, html, message, target):
         message.attach(MIMEText(html, "html"))
 
-        with smtplib.SMTP_SSL(self.host, self.port, context=self.context) as server:
-            server.login(self.sender, self.app_pass)
-            server.sendmail(self.sender, target, message.as_string())
-
+        try:
+          with smtplib.SMTP_SSL(self.host, self.port, context=self.context, timeout=3.0) as server:
+              server.login(self.sender, self.app_pass)
+              server.sendmail(self.sender, target, message.as_string())
+        except TimeoutError:
+          print("TIMEOUT REACHED. DA SERVER IS DA DING MAAAAN")
 
