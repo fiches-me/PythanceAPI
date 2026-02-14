@@ -1,18 +1,17 @@
 def init_database_scheme(db):
-    user_fields = {
+    users_fields = {
         "id": "INT",
         "name": "TEXT",
         "email": "TEXT",
-        "email_verified": "BOOL",
     }
-    db.init_table("users", user_fields, primary_key="id")
+    db.init_table("users", users_fields, primary_key="id")
     
-    org_fields = {
+    orgs_fields = {
         "id": "INT",
         "name": "TEXT",
         "owner_id": ("FOREIGN KEY", "users(id)"),
     }
-    db.init_table("orgs", org_fields, primary_key="id")
+    db.init_table("orgs", orgs_fields, primary_key="id")
 
     tokens_fields = {
         "id": "INT",
@@ -21,9 +20,27 @@ def init_database_scheme(db):
     }
     db.init_table("tokens", tokens_fields, primary_key="id")
 
-    code_fields = {
+    codes_fields = {
         "id": "INT",
         "code": "TEXT",
+        #"date": "DATETIME",
         "email": "TEXT",
     }
-    db.init_table("codes", code_fields, primary_key="id")
+    db.init_table("codes", codes_fields, primary_key="id")
+
+    tools_fields = {
+        "id": "INT",
+        "type": "INT",
+        "name": "TEXT",
+        "owner_id": ("FOREIGN KEY", "users(id)"),
+    }
+    db.init_table("tools", tools_fields, primary_key="id")
+
+    plates_fields = {
+        "id": "INT",
+        "date": "DATETIME",
+        "name": "TEXT",
+        "org_id": ("FOREIGN KEY", "orgs(id)"),
+        "owner_id": ("FOREIGN KEY", "users(id)"),
+    }
+    db.init_table("plates", plates_fields, primary_key="id")

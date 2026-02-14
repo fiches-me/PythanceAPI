@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Boolean, ForeignKey
+from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Boolean, ForeignKey, Enum
 from sqlalchemy.sql import text
 from sqlalchemy.engine.reflection import Inspector
 
@@ -44,6 +44,7 @@ class SimpleDB:
         "TEXT": Text,  # ici on met Text() qui est cross-DB et valide en MySQL/Postgres/SQLite
         "VARCHAR": lambda: String(255),  # toujours explicite
         "BOOL": Boolean,
+        "ENUM": Enum,
         "FLOAT": Float,
         "DATETIME": DateTime,
         }
@@ -52,20 +53,40 @@ class SimpleDB:
             t = type_map[type_.upper()]
             return Column(name, t() if callable(t) else t)
         return Column(name, String(255))
+
     def execute(self, query, params=None):
         """Exécute une requête SQL brute."""
         if params is None:
             params = ()
-        # Assurez-vous que params est un tuple ou une liste de valeurs
         return self.connection.execute(text(query), params)
 
 
-    def select(self, table, where=None, params=None):
-        """Select rows from a table."""
+    def select(self, table, where=None, params = {}):
+        """
+        Select rows from a table.
+        :param where: A dictionary of filters, e.g., {'id': 5, 'active': True}
+        """
         query = f"SELECT * FROM {table}"
-        if where:
-            query += f" WHERE {where}"
+
+        if where and isinstance(where, dict):
+            conditions = []
+            for key in where:
+                # We use named parameters (e.g., "id = :id")
+                # SQLAlchemy automatically maps the ":key" in the query 
+                # to the corresponding value in the 'params' dictionary.
+                conditions.append(f"{key} = :{key}")
+            
+            query += " WHERE " + " AND ".join(conditions)
+            params = where
+
         return self.execute(query, params)
+
+    def select_one(self, table, where=None, params = {}):
+        """
+        Select rows from a table.
+        :param where: A dictionary of filters, e.g., {'id': 5, 'active': True}
+        """
+        return self.select(table, where, params)[0]
 
     def insert(self, table, data):
         """Insère une nouvelle ligne dans la table spécifiée."""
@@ -95,3 +116,12 @@ class SimpleDB:
     def close(self):
         """Close the connection."""
         self.connection.close()
+
+
+try:
+    database_url = os.environ.get("DATABASE_LINK")
+except:
+    print("No database URL is set. Fallback to local SQLITE server...")
+    database_url = "sqlite:///local.db"
+
+db = SimpleDB(database_url)

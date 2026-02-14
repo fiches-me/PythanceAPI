@@ -1,12 +1,15 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from database import db
 
 router = APIRouter()
+
 
 @router.get("/")
 async def get_plates():
     """
     Get the list of planned plates.
     """
-    # logique de création → remplace par DB
+    oid = 0
+    db.select("plates", where={"org_id", oid})
     return {"status": "online"}

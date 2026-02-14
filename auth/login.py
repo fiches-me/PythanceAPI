@@ -2,13 +2,10 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from utils import mail
 from random import randint
-from database import SimpleDB
-import os
+from database import db
 
 router = APIRouter()
-db = SimpleDB(os.environ["DATABASE_LINK"])
 
-# modèles définis dans ce fichier (selon ta contrainte)
 class LoginRequest(BaseModel):
     email: str
 
