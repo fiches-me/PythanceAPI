@@ -1,6 +1,6 @@
 fastapi
 SQLAlchemy
-psycopg
+psycopg[binary]
 PyMySQL
 pydantic
 uvicorn
