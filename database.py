@@ -1,3 +1,4 @@
+import os
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, Boolean, ForeignKey, Enum
 from sqlalchemy.sql import text
 from sqlalchemy.engine.reflection import Inspector
@@ -118,10 +119,10 @@ class SimpleDB:
         self.connection.close()
 
 
-try:
-    database_url = os.environ.get("DATABASE_LINK")
-except:
+database_url = os.environ.get("DATABASE_LINK")
+
+if not database_url:
     print("No database URL is set. Fallback to local SQLITE server...")
-    database_url = "sqlite:///local.db"
+    database_url = "sqlite:////tmp/local.db"
 
 db = SimpleDB(database_url)
