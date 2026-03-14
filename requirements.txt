@@ -1,5 +1,6 @@
 fastapi
 SQLAlchemy
+psycopg
 PyMySQL
 pydantic
 uvicorn
