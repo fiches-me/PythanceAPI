@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
+from collections.abc import Mapping
 from database import db
 
 router = APIRouter()
@@ -27,8 +28,8 @@ async def send_mail_code(payload: CodeRequest):
         print(f"No code found for email: {payload.email}")
         raise HTTPException(status_code=404, detail="code not found")
 
-    # extract the stored code (handle dict or tuple result)
-    if isinstance(record, dict):
+    # extract the stored code (handle Mapping, dict or tuple/sequence result)
+    if isinstance(record, Mapping):
         stored_code = record.get("code")
     else:
         try:
@@ -45,11 +46,17 @@ async def send_mail_code(payload: CodeRequest):
         print(f"User not found for email: {payload.email}")
         raise HTTPException(status_code=404, detail="user not found")
 
-    # extract user id
-    if isinstance(user, dict):
+    # extract user id (Mapping-compatible or sequence)
+    if isinstance(user, Mapping):
         user_id = user.get("id")
     else:
-        user_id = user[0]
+        try:
+            user_id = user[0]
+        except Exception:
+            try:
+                user_id = user.get("id")
+            except Exception:
+                user_id = None
 
     try:
         user_id = int(user_id)
