@@ -28,12 +28,13 @@ async def login_request(payload: LoginRequest):
         code = random_code()
         email_value = payload.email
         try:
-            db.execute("INSERT INTO codes (email, code) VALUES (?, ?)", (email_value, code))
+            db.insert("codes", {"email": email_value, "code": code})
         except Exception as e:
             print(f"Erreur détaillée : {e}")
             print(f"Type de payload.email : {type(payload.email)}")
             print(f"Type de code : {type(code)}")
+            raise HTTPException(status_code=500, detail="failed to insert code")
         mail.MailHelper().verification_email(email_value, code)
         return {"success": True}
     except Exception as e:
-        return {"success": False, "error": e}, 403
+        raise HTTPException(status_code=403, detail=str(e))
