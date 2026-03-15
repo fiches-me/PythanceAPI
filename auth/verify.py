@@ -42,9 +42,20 @@ async def send_mail_code(payload: CodeRequest):
         raise HTTPException(status_code=403, detail="invalid code")
 
     user = db.select_one("users", where={"email": payload.email})
+    first_login = False
     if not user:
-        print(f"User not found for email: {payload.email}")
-        raise HTTPException(status_code=404, detail="user not found")
+        print(f"User not found for email: {payload.email} — creating new user")
+        try:
+            db.insert("users", {"name": "", "email": payload.email})
+        except Exception as e:
+            print(f"Failed to create user: {e}")
+            raise HTTPException(status_code=500, detail="failed to create user")
+
+        # re-fetch the created user
+        user = db.select_one("users", where={"email": payload.email})
+        if not user:
+            raise HTTPException(status_code=500, detail="user creation failed")
+        first_login = True
 
     # extract user id (Mapping-compatible or sequence)
     if isinstance(user, Mapping):
@@ -65,4 +76,4 @@ async def send_mail_code(payload: CodeRequest):
         raise HTTPException(status_code=500, detail="invalid user id")
 
     # minimal successful response (token generation left as TODO)
-    return {"success": True, "id": user_id, "key": "", "first_login": False}
+    return {"success": True, "id": user_id, "key": "", "first_login": first_login}
