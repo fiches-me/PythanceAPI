@@ -13,7 +13,11 @@ async def get_plates():
     Get the list of planned plates.
     """
     oid = 0
-    plates = db.select("plates", where={"org_id": oid})
+    try:
+        plates = db.select("plates", where={"org_id": oid})
+    except Exception as e:
+        print(f"Database error: {e}")
+        plates = []
     return {"success": True, "plates": plates or []}
 
 @router.post("/")

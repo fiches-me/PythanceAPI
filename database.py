@@ -73,6 +73,17 @@ class SimpleDB:
         rows = self.select(table_name, where)
         return rows[0] if rows else None
 
+    def update(self, table_name, where, data):
+        table = self.metadata.tables[table_name]
+        stmt = table.update()
+
+        if where:
+            for k, v in where.items():
+                stmt = stmt.where(table.c[k] == v)
+
+        with self.engine.begin() as conn:
+            conn.execute(stmt.values(**data))
+
 db_url = os.environ.get(
     "DATABASE_LINK",
     "sqlite:////tmp/local.db"

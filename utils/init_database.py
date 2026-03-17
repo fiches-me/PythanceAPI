@@ -23,7 +23,7 @@ def init_database_scheme(db):
     codes_fields = {
         "id": "INT",
         "code": "TEXT",
-        #"date": "DATETIME",
+        "created_at": "DATETIME",
         "email": "TEXT",
     }
     db.init_table("codes", codes_fields, primary_key="id")
