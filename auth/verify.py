@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from collections.abc import Mapping
 from database import db
+from utils.create_api_key import create_api_key
 
 router = APIRouter()
 
@@ -75,5 +76,6 @@ async def send_mail_code(payload: CodeRequest):
         print(f"Invalid user id for email: {payload.email}. Value: {user_id}")
         raise HTTPException(status_code=500, detail="invalid user id")
 
-    # minimal successful response (token generation left as TODO)
-    return {"success": True, "id": user_id, "key": "", "first_login": first_login}
+    key = create_api_key()
+    db.insert("tokens", {"token": key, "owner_id": user_id})
+    return {"success": True, "id": user_id, "key": key, "first_login": first_login}
