@@ -14,7 +14,7 @@ class SuccessUserLogin(BaseModel):
     success: bool
     id: int
     key: str
-    first_login: bool
+    newuser: bool
 
 @router.post("/", response_model=SuccessUserLogin)
 async def send_mail_code(payload: CodeRequest):
@@ -78,4 +78,4 @@ async def send_mail_code(payload: CodeRequest):
 
     key = create_api_key()
     db.insert("tokens", {"token": key, "owner_id": user_id})
-    return {"success": True, "id": user_id, "key": key, "first_login": first_login}
+    return {"success": True, "id": user_id, "key": key, "newuser": first_login}
