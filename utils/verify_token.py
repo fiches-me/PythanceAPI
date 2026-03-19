@@ -12,14 +12,14 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(security)):
         print(f"No token found: {requestToken}")
         raise HTTPException(status_code=401, detail="code not found")
 
-    userId = dbToken[2]
-
+    
+    userId = dbToken.get('owner_id')
     dbUser = db.select_one("users", where={"id": userId})
-
+    
     if not dbUser:
         print(f"No user with token found: {requestToken}, {userId}")
         raise HTTPException(status_code=404, detail="code not found")
 
-    ordId = dbUser[3]
+    ordId = dbUser.get('org_id')
 
     return {"user_id": userId, "org_id": ordId}
