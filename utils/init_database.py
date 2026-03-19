@@ -3,6 +3,7 @@ def init_database_scheme(db):
         "id": "INT",
         "name": "TEXT",
         "email": "TEXT",
+        "org_id": ("FOREIGN KEY", "orgs(id)"),
     }
     db.init_table("users", users_fields, primary_key="id")
     
