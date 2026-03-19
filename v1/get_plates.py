@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 from database import db
+from utils.verify_token import verify_token
 
 router = APIRouter()
 
